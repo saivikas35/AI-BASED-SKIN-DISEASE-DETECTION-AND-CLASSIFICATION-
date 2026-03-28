@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermAI — Skin Disease Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface2: #21262d;
+            --border: #30363d;
+            --accent: #238636;
+            --accent2: #1f6feb;
+            --accent-glow: rgba(35,134,54,0.25);
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --danger: #da3633;
+            --gold: #e3b341;
+            --purple: #8b5cf6;
+            --cyan: #58a6ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ── SIDEBAR ───────────────────────────────── */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 0;
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            z-index: 100;
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px 28px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #238636, #1f6feb);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .logo-text { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; }
+        .logo-text span { color: var(--cyan); }
+
+        .nav-section-title {
+            font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--text-muted);
+            padding: 0 24px; margin-bottom: 6px;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 24px; color: var(--text-muted);
+            text-decoration: none; font-size: 0.88rem; font-weight: 500;
+            transition: all 0.2s; border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+        .nav-item:hover { color: var(--text); background: var(--surface2); }
+        .nav-item.active {
+            color: var(--cyan); background: rgba(31,111,235,0.1);
+            border-left-color: var(--cyan);
+        }
+        .nav-item i { width: 18px; text-align: center; }
+
+        .sidebar-stats {
+            margin: 24px 16px 0;
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .sidebar-stats h4 { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+        .stat-val { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ── MAIN CONTENT ──────────────────────────── */
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 32px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .page-title h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+        .page-title p { font-size: 0.88rem; color: var(--text-muted); margin-top: 4px; }
+
+        .topbar-actions { display: flex; align-items: center; gap: 12px; }
+        .badge {
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 20px; padding: 6px 14px; font-size: 0.78rem;
+            color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+        }
+        .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ── STAT CARDS ────────────────────────────── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .stat-card:hover { border-color: var(--cyan); transform: translateY(-2px); }
+        .stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .stat-card-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
+        }
+        .stat-card-change {
+            font-size: 0.72rem; font-weight: 600;
+            padding: 3px 8px; border-radius: 20px;
+        }
+        .up { background: rgba(35,134,54,0.15); color: #3fb950; }
+        .neutral { background: rgba(88,166,255,0.1); color: var(--cyan); }
+        .stat-card-value { font-size: 1.9rem; font-weight: 800; letter-spacing: -1px; }
+        .stat-card-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* ── MAIN GRID ─────────────────────────────── */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+        }
+        .card-title {
+            font-size: 1rem; font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 22px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-title i { color: var(--cyan); }
+
+        /* ── UPLOAD ZONE ───────────────────────────── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            background: var(--surface2);
+            overflow: hidden;
+        }
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--cyan);
+            background: rgba(31,111,235,0.05);
+        }
+        .upload-zone input {
+            position: absolute; inset: 0;
+            opacity: 0; cursor: pointer;
+            width: 100%; height: 100%;
+            z-index: 10;
+        }
+        .upload-icon {
+            width: 72px; height: 72px;
+            background: rgba(31,111,235,0.12);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px; color: var(--cyan);
+            transition: transform 0.3s;
+        }
+        .upload-zone:hover .upload-icon { transform: scale(1.1); }
+        .upload-zone h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+        .upload-zone p { font-size: 0.82rem; color: var(--text-muted); }
+        .upload-zone .formats {
+            display: flex; gap: 8px; justify-content: center; margin-top: 16px; flex-wrap: wrap;
+        }
+        .format-badge {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; padding: 3px 10px; font-size: 0.72rem;
+            color: var(--text-muted); font-weight: 500;
+        }
+
+        #preview-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #preview-container img {
+            max-height: 220px;
+            max-width: 100%;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .preview-name {
+            margin-top: 10px; font-size: 0.82rem; color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .preview-name i { color: var(--accent); }
+
+        /* ── SUBMIT BUTTON ─────────────────────────── */
+        .analyze-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.3s;
+            letter-spacing: 0.3px;
+        }
+        .analyze-btn:hover { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+        .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ── LOADING ───────────────────────────────── */
+        #loading-overlay {
+            display: none;
+            margin-top: 20px;
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .spinner {
+            width: 44px; height: 44px;
+            border: 3px solid var(--border);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 14px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 0.88rem; color: var(--text-muted); }
+        .loading-steps { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+        .step-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.78rem; color: var(--text-muted);
+        }
+        .step-item i { color: var(--accent); }
+
+        /* ── RIGHT PANEL ───────────────────────────── */
+        .right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+        .info-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+        }
+        .info-card h3 {
+            font-size: 0.88rem; font-weight: 600; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px; color: var(--text);
+        }
+        .info-card h3 i { color: var(--gold); }
+
+        .disease-list { display: flex; flex-direction: column; gap: 8px; }
+        .disease-tag {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px;
+            background: var(--surface2);
+            border-radius: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .disease-tag:hover { border-color: var(--cyan); color: var(--text); }
+        .disease-tag .d-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+
+        .tip-card { background: linear-gradient(135deg, rgba(31,111,235,0.1), rgba(35,134,54,0.08)); }
+        .tip-list { display: flex; flex-direction: column; gap: 10px; }
+        .tip-item { display: flex; gap: 10px; font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+        .tip-item i { color: var(--cyan); margin-top: 2px; flex-shrink: 0; }
+
+        /* ── DISCLAIMER ────────────────────────────── */
+        .disclaimer {
+            margin-top: 16px;
+            background: rgba(227,179,65,0.08);
+            border: 1px solid rgba(227,179,65,0.25);
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex; gap: 12px; align-items: flex-start;
+            font-size: 0.78rem; color: var(--text-muted); line-height: 1.6;
+        }
+        .disclaimer i { color: var(--gold); margin-top: 2px; flex-shrink: 0; }
+
+        /* ── RESPONSIVE ────────────────────────────── */
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🧬</div>
+        <div class="logo-text">Derm<span>AI</span></div>
+    </div>
+
+    <div class="nav-section-title">Navigation</div>
+    <a class="nav-item active" href="/"><i class="fa-solid fa-house-medical"></i> Dashboard</a>
+    <a class="nav-item" href="#" onclick="document.getElementById('file-input').click();return false;"><i class="fa-solid fa-upload"></i> Upload Image</a>
+
+    <br>
+    <div class="nav-section-title">Model Info</div>
+    <a class="nav-item" href="#"><i class="fa-solid fa-brain"></i> ResNet-50 + SVM</a>
+    <a class="nav-item" href="#"><i class="fa-solid fa-layer-group"></i> 23 Categories</a>
+    <a class="nav-item" href="#"><i class="fa-solid fa-chart-simple"></i> ~90% Accuracy</a>
+
+    <div class="sidebar-stats">
+        <h4>System Status</h4>
+        <div class="stat-row">
+            <span class="stat-label"><span class="stat-dot" style="background:#3fb950"></span>Model</span>
+            <span class="stat-val" style="color:#3fb950">Online</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label"><span class="stat-dot" style="background:#58a6ff"></span>ResNet</span>
+            <span class="stat-val" style="color:#58a6ff">Loaded</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label"><span class="stat-dot" style="background:#8b5cf6"></span>SVM-23</span>
+            <span class="stat-val" style="color:#8b5cf6">Ready</span>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        DermAI v3.0 &nbsp;·&nbsp; DermNet Dataset<br>
+        For educational use only
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+    <div class="topbar">
+        <div class="page-title">
+            <h1>Skin Disease Detection</h1>
+            <p>Upload a skin image for AI-powered diagnosis across 23 categories</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="badge"><span class="dot"></span> AI Model Active</div>
+        </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon" style="background:rgba(31,111,235,0.15); color:#58a6ff"><i class="fa-solid fa-microscope"></i></div>
+                <span class="stat-card-change neutral">CNN</span>
+            </div>
+            <div class="stat-card-value">23</div>
+            <div class="stat-card-label">Disease Categories</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon" style="background:rgba(35,134,54,0.15); color:#3fb950"><i class="fa-solid fa-bullseye"></i></div>
+                <span class="stat-card-change up">↑ High</span>
+            </div>
+            <div class="stat-card-value">~90%</div>
+            <div class="stat-card-label">Model Accuracy</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon" style="background:rgba(139,92,246,0.15); color:#8b5cf6"><i class="fa-solid fa-database"></i></div>
+                <span class="stat-card-change neutral">DermNet</span>
+            </div>
+            <div class="stat-card-value">39K+</div>
+            <div class="stat-card-label">Training Images</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon" style="background:rgba(227,179,65,0.15); color:#e3b341"><i class="fa-solid fa-bolt"></i></div>
+                <span class="stat-card-change up">Fast</span>
+            </div>
+            <div class="stat-card-value">&lt;3s</div>
+            <div class="stat-card-label">Avg. Prediction Time</div>
+        </div>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="content-grid">
+
+        <!-- UPLOAD CARD -->
+        <div class="card">
+            <div class="card-title"><i class="fa-solid fa-image"></i> Image Analysis</div>
+
+            <form action="/predict" method="post" enctype="multipart/form-data" id="upload-form">
+                <div class="upload-zone" id="upload-zone">
+                    <input type="file" id="file-input" name="file" accept="image/*" required>
+                    <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <h3>Click here to upload a skin image</h3>
+                    <p style="color:var(--text-muted);font-size:0.82rem;margin-top:6px">or drag &amp; drop — JPG, PNG, WEBP supported</p>
+                </div>
+
+                <div id="preview-container">
+                    <img id="preview" src="#" alt="Preview">
+                    <div class="preview-name"><i class="fa-solid fa-check-circle"></i> <span id="file-name">Image ready</span></div>
+                </div>
+
+                <div id="loading-overlay">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Analyzing image with AI...</div>
+                    <div class="loading-steps">
+                        <div class="step-item"><i class="fa-solid fa-check"></i> Preprocessing & CLAHE enhancement</div>
+                        <div class="step-item"><i class="fa-solid fa-check"></i> ResNet-50 feature extraction</div>
+                        <div class="step-item"><i class="fa-solid fa-spinner fa-spin"></i> SVM classification (23 classes)</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="analyze-btn" id="submit-btn">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i> Analyze Image
+                </button>
+            </form>
+
+
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+
+            <div class="info-card">
+                <h3><i class="fa-solid fa-star"></i> Detectable Conditions</h3>
+                <div class="disease-list">
+                    <div class="disease-tag"><span class="d-dot" style="background:#f85149"></span>Acne & Rosacea</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#ff9f43"></span>Eczema / Atopic Dermatitis</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#ffd32a"></span>Psoriasis / Lichen Planus</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#0be881"></span>Fungal Infections</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#58a6ff"></span>Melanoma & Moles</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#8b5cf6"></span>Alopecia & Hair Loss</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#fd7272"></span>Bacterial Infections</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#67e0a3"></span>Viral Infections (Warts)</div>
+                    <div class="disease-tag"><span class="d-dot" style="background:#e3b341"></span>+ 15 more categories</div>
+                </div>
+            </div>
+
+            <div class="info-card tip-card">
+                <h3><i class="fa-solid fa-lightbulb"></i> Tips for Best Results</h3>
+                <div class="tip-list">
+                    <div class="tip-item"><i class="fa-solid fa-sun"></i> Use good natural or even artificial lighting</div>
+                    <div class="tip-item"><i class="fa-solid fa-crop"></i> Crop the image to focus on the affected area</div>
+                    <div class="tip-item"><i class="fa-solid fa-camera"></i> Keep the image sharp and in focus</div>
+                    <div class="tip-item"><i class="fa-solid fa-expand"></i> Ensure the lesion is clearly visible</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('preview-container');
+    const form = document.getElementById('upload-form');
+    const loading = document.getElementById('loading-overlay');
+    const submitBtn = document.getElementById('submit-btn');
+    const uploadZone = document.getElementById('upload-zone');
+    const fileName = document.getElementById('file-name');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            fileName.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            submitBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass-chart"></i> Analyze Image';
+        }
+    });
+
+    form.addEventListener('submit', function(e) {
+        loading.style.display = 'block';
+        previewContainer.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
+    });
+
+    ['dragenter','dragover'].forEach(ev => uploadZone.addEventListener(ev, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploadZone.classList.add('drag-over');
+    }));
+    ['dragleave','drop'].forEach(ev => uploadZone.addEventListener(ev, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploadZone.classList.remove('drag-over');
+    }));
+    uploadZone.addEventListener('drop', function(e) {
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            fileInput.files = e.dataTransfer.files;
+            fileName.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = ev => { preview.src = ev.target.result; previewContainer.style.display = 'block'; };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+</body>
+</html>

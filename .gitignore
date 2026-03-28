@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+.env
+.venv
+venv/
+env/
+.python-version
+
+# OS files
+.DS_Store
+
+# 🔴 IMPORTANT (for your project)
+*.h5
+*.npy
+*.pkl
+
+# Datasets
+dataset/
+Training/
+train/
+test/
+
+# Images (optional if large)
+*.jpg
+*.png
+*.jpeg
+
+# Logs
+*.log

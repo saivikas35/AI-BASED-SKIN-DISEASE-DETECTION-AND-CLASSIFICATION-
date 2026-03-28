@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermAI — Prediction Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+            --border: #30363d; --accent: #238636; --accent2: #1f6feb;
+            --text: #e6edf3; --text-muted: #8b949e;
+            --gold: #e3b341; --cyan: #58a6ff; --purple: #8b5cf6;
+            --danger: #f85149; --green: #3fb950;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px; min-height: 100vh;
+            background: var(--surface); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 24px 0; position: fixed;
+            left: 0; top: 0; bottom: 0; z-index: 100;
+        }
+        .sidebar-logo {
+            display: flex; align-items: center; gap: 12px;
+            padding: 0 24px 28px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
+        }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #238636, #1f6feb);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .logo-text { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; }
+        .logo-text span { color: var(--cyan); }
+        .nav-section-title {
+            font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--text-muted); padding: 0 24px; margin-bottom: 6px;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 24px; color: var(--text-muted); text-decoration: none;
+            font-size: 0.88rem; font-weight: 500; transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .nav-item:hover { color: var(--text); background: var(--surface2); }
+        .nav-item.active { color: var(--cyan); background: rgba(31,111,235,0.1); border-left-color: var(--cyan); }
+        .nav-item i { width: 18px; text-align: center; }
+        .sidebar-footer {
+            margin-top: auto; padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem; color: var(--text-muted);
+        }
+
+        /* MAIN */
+        .main { margin-left: 260px; flex: 1; padding: 32px; min-height: 100vh; }
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;
+        }
+        .page-title h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+        .page-title p { font-size: 0.88rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* RESULT HERO */
+        .result-hero {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        .result-left { text-align: center; }
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(35,134,54,0.12);
+            border: 1px solid rgba(63,185,80,0.3);
+            border-radius: 30px;
+            padding: 7px 18px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--green);
+            margin-bottom: 20px;
+        }
+        .result-disease-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        .result-subtitle { font-size: 0.88rem; color: var(--text-muted); }
+
+        /* CONFIDENCE */
+        .confidence-section { margin-top: 28px; }
+        .conf-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px;
+        }
+        .conf-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+        .conf-value { font-size: 1.5rem; font-weight: 800; color: var(--green); }
+        .conf-bar-bg {
+            height: 12px; background: var(--surface2);
+            border-radius: 30px; overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .conf-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #238636, #58a6ff);
+            border-radius: 30px;
+            width: 0;
+            transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        .conf-ticks {
+            display: flex; justify-content: space-between;
+            margin-top: 6px; font-size: 0.68rem; color: var(--text-muted);
+        }
+
+        /* RIGHT side of hero - result actions */
+        .result-right {}
+        .action-cards { display: flex; flex-direction: column; gap: 14px; }
+        .action-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex; align-items: center; gap: 16px;
+            text-decoration: none; color: var(--text);
+            transition: all 0.2s;
+        }
+        .action-card:hover { border-color: var(--cyan); transform: translateX(4px); }
+        .action-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        .action-info h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 4px; }
+        .action-info p { font-size: 0.78rem; color: var(--text-muted); }
+        .action-arrow { margin-left: auto; color: var(--text-muted); font-size: 0.85rem; }
+
+        /* DETAIL CARDS */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .detail-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+        }
+        .detail-card-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; margin-bottom: 14px;
+        }
+        .detail-card h4 { font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; }
+        .detail-card p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
+
+        /* DISCLAIMER */
+        .disclaimer {
+            margin-top: 20px;
+            background: rgba(227,179,65,0.07);
+            border: 1px solid rgba(227,179,65,0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex; gap: 12px; align-items: flex-start;
+            font-size: 0.8rem; color: var(--text-muted); line-height: 1.6;
+        }
+        .disclaimer i { color: var(--gold); margin-top: 2px; flex-shrink: 0; }
+        
+        /* AI VISUALIZER */
+        .visualizer-section { margin-top: 32px; margin-bottom: 32px; }
+        .visualizer-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .visualizer-header h2 { font-size: 1.3rem; font-weight: 700; }
+        .visualizer-header .badge { background: rgba(88,166,255,0.15); color: var(--cyan); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        
+        .visualizer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .vis-card { 
+            background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s;
+        }
+        .vis-card:hover { border-color: rgba(88,166,255,0.4); transform: translateY(-4px); }
+        .vis-img-container { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .vis-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .vis-card:hover .vis-img { transform: scale(1.05); }
+        
+        .vis-label { 
+            padding: 16px 20px; background: var(--surface2); border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .vis-label span { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+        .vis-label i { font-size: 0.9rem; color: var(--text-muted); }
+        
+        .heatmap-overlay-info {
+            position: absolute; bottom: 12px; left: 12px; right: 12px;
+            background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(8px);
+            padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.72rem; color: var(--text-muted); pointer-events: none;
+        }
+        .heatmap-overlay-info strong { color: var(--cyan); display: block; margin-bottom: 2px; }
+
+        @media (max-width: 900px) {
+            .result-hero { grid-template-columns: 1fr; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🧬</div>
+        <div class="logo-text">Derm<span>AI</span></div>
+    </div>
+    <div class="nav-section-title">Navigation</div>
+    <a class="nav-item" href="/"><i class="fa-solid fa-house-medical"></i> Dashboard</a>
+    <a class="nav-item active" href="#"><i class="fa-solid fa-chart-pie"></i> Result</a>
+    <a class="nav-item" href="/report/{{ disease_id }}"><i class="fa-solid fa-file-medical"></i> Medical Report</a>
+    <div class="sidebar-footer">DermAI v3.0 &nbsp;·&nbsp; For educational use only</div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="page-title">
+            <h1>Prediction Result</h1>
+            <p>AI analysis complete — review the diagnosis below</p>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="result-hero">
+        <div class="result-left">
+            <div class="result-badge">
+                <i class="fa-solid fa-circle-check"></i> Analysis Complete
+            </div>
+            <div class="result-disease-name">{{ prediction }}</div>
+            <div class="result-subtitle">Detected by ResNet-50 + Calibrated SVM (23-class model)</div>
+
+            <div class="confidence-section">
+                <div class="conf-header">
+                    <span class="conf-label"><i class="fa-solid fa-gauge-high" style="color:var(--cyan);margin-right:6px"></i>Confidence Score</span>
+                    <span class="conf-value">{{ confidence }}%</span>
+                </div>
+                <div class="conf-bar-bg">
+                    <div class="conf-bar-fill" id="conf-bar" style="width:0"></div>
+                </div>
+                <div class="conf-ticks">
+                    <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-right">
+            <div class="action-cards">
+                <a href="/report/{{ disease_id }}" class="action-card">
+                    <div class="action-icon" style="background:rgba(31,111,235,0.15);color:#58a6ff">
+                        <i class="fa-solid fa-file-medical"></i>
+                    </div>
+                    <div class="action-info">
+                        <h4>Generate Medical Report</h4>
+                        <p>Detailed causes, symptoms & treatment</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+                <a href="/" class="action-card">
+                    <div class="action-icon" style="background:rgba(35,134,54,0.15);color:#3fb950">
+                        <i class="fa-solid fa-rotate"></i>
+                    </div>
+                    <div class="action-info">
+                        <h4>Analyze Another Image</h4>
+                        <p>Upload a new skin image for diagnosis</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI VISUALIZER SECTION -->
+    <div class="visualizer-section">
+        <div class="visualizer-header">
+            <div class="logo-icon" style="width:32px;height:32px;font-size:14px">🔍</div>
+            <h2>AI Diagnostic Visualizer</h2>
+            <span class="badge">Interpretability Engine</span>
+        </div>
+        
+        <div class="visualizer-grid">
+            <!-- Original Image -->
+            <div class="vis-card">
+                <div class="vis-img-container">
+                    <img src="{{ original_image_url }}" alt="Uploaded Skin Image" class="vis-img">
+                </div>
+                <div class="vis-label">
+                    <span>Input Diagnostic Image</span>
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+            </div>
+            
+            <!-- Heatmap Image -->
+            <div class="vis-card" style="border-color: rgba(139,92,246,0.3)">
+                <div class="vis-img-container">
+                    <img src="{{ heatmap_image_url }}" alt="Grad-CAM Heatmap" class="vis-img">
+                    <div class="heatmap-overlay-info">
+                        <strong>Grad-CAM Activation</strong>
+                        Highlighting regions with high diagnostic significance
+                    </div>
+                </div>
+                <div class="vis-label">
+                    <span>AI Interpretability Map (Grad-CAM)</span>
+                    <i class="fa-solid fa-microscope"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAIL CARDS -->
+    <div class="detail-grid">
+        <div class="detail-card">
+            <div class="detail-card-icon" style="background:rgba(31,111,235,0.12);color:var(--cyan)">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <h4>Model Architecture</h4>
+            <p>ResNet-50 feature extractor with Calibrated Linear SVM classifier trained on 23 DermNet categories.</p>
+        </div>
+        <div class="detail-card">
+            <div class="detail-card-icon" style="background:rgba(139,92,246,0.12);color:var(--purple)">
+                <i class="fa-solid fa-sliders"></i>
+            </div>
+            <h4>Preprocessing</h4>
+            <p>Image resized to 192×192, CLAHE contrast enhancement applied in LAB color space before feature extraction.</p>
+        </div>
+        <div class="detail-card">
+            <div class="detail-card-icon" style="background:rgba(63,185,80,0.12);color:var(--green)">
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+            <h4>Next Steps</h4>
+            <p>Generate a full medical report for causes, symptoms, treatment options, and when to visit a specialist.</p>
+        </div>
+    </div>
+
+
+</main>
+
+<script>
+    window.addEventListener('load', () => {
+        const bar = document.getElementById('conf-bar');
+        const confidence = {{ confidence }};
+        setTimeout(() => { bar.style.width = Math.min(confidence, 100) + '%'; }, 200);
+    });
+</script>
+</body>
+</html>
