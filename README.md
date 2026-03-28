@@ -49,15 +49,29 @@ Instead of a standard Softmax layer, we extract a **2048-dimensional feature vec
 
 ## 📋 Supported Diseases (23 Classes)
 
-*   Acne & Rosacea
-*   Skin Cancer (Actinic Keratosis/BCC/Melanoma)
-*   Atopic Dermatitis (Eczema)
-*   Bacterial Infections (Cellulitis/Impetigo)
-*   Fungal Infections (Ringworm/Nail Fungus)
-*   Pigmentation Disorders
-*   Viral Infections (Warts/Herpes)
-*   Psoriasis & Lichen Planus
-*   ...and 15 others.
+1. **Acne & Rosacea** (Acne/Rosacea)
+2. **Skin Cancer (Malignant)** (Actinic Keratosis/BCC)
+3. **Atopic Dermatitis** (Eczema)
+4. **Bullous Disease** (Blistering Disorders)
+5. **Bacterial Infections** (Cellulitis/Impetigo)
+6. **Eczema** (Nonspecific Dermatitis)
+7. **Exanthems & Drug Eruptions**
+8. **Alopecia & Hair Loss**
+9. **Viral Infection (STDs)** (Herpes/HPV)
+10. **Pigmentation Disorders** (Vitiligo/Melasma)
+11. **Connective Tissue Disease** (Lupus)
+12. **Melanoma & Moles** (Pigmented Cancer)
+13. **Nail Fungus** (Onychomycosis)
+14. **Contact Dermatitis** (Poison Ivy/Allergies)
+15. **Psoriasis** (Psoriasis/Lichen Planus)
+16. **Infestations & Bites** (Scabies/Lyme)
+17. **Benign Tumors** (Seborrheic Keratoses)
+18. **Systemic Skin Manifestations**
+19. **Fungal Infection** (Tinea/Ringworm)
+20. **Urticaria** (Hives)
+21. **Vascular Tumors**
+22. **Vasculitis**
+23. **Viral Infections** (Warts/Molluscum)
 
 ---
 
@@ -90,9 +104,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-## 👤 Developed By
-**Sai Vikas**  
-*AI & Machine Learning Developer*
+## 👥 Developers
+
+*   **Sai Vikas**
+*   **G. Sarvaghna Reddy**
+
+*AI & Machine Learning Engineering Team*
 
 ---
 
