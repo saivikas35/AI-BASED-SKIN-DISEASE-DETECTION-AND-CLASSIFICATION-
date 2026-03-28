@@ -1,116 +1,88 @@
-# 🛡️ DermAI — AI-Based Skin Disease Detection & Classification
+# AI-Based Skin Disease Detection and Classification
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange?logo=tensorflow)](https://www.tensorflow.org/)
-[![Flask](https://img.shields.io/badge/Flask-3.0-lightgrey?logo=flask)](https://flask.palletsprojects.com/)
-[![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
+## 1. Project Title
+**AI-Based Skin Disease Detection and Classification**
 
-**DermAI** is a state-of-the-art diagnostic assistant that utilizes a hybrid **ResNet-50 + Calibrated SVM** architecture to detect and classify **23 distinct skin disease categories**. By combining deep learning with clinical datasets (DermNet NZ & HAM10000), it provides dermatologists and patients with high-confidence predictions and visual "Explainable AI" heatmaps.
+## 2. Description
+This project is an advanced diagnostic tool designed to assist dermatologists and healthcare professionals in identifying skin conditions from digital images. By leveraging a hybrid Deep Learning and Machine Learning approach, the system can classify images into 23 different disease categories with high accuracy and explainable visual feedback.
 
----
+## 3. Features
+*   **Dual-Model Intelligence**: Combines ResNet-50's feature extraction with SVM's robust classification.
+*   **Explainable AI (XAI)**: Integrated Grad-CAM heatmaps to visualize the model's area of focus.
+*   **Automated Medical Reports**: Generates clinical-grade reports with descriptions, causes, and symptoms.
+*   **Confidence Estimation**: Uses probability calibration to provide reliable diagnosis scores.
+*   **Interactive Dashboard**: A modern, responsive web interface for easy file uploads and analysis.
 
-## 🚀 Key Features
+## 4. Methodology
+The system follows a rigorous five-stage pipeline:
+*   **Dataset**: Integration of DermNet NZ (General Diseases) and HAM10000 (Pigmented Lesions).
+*   **Preprocessing**: Normalization and CLAHE (Contrast Limited Adaptive Histogram Equalization) for enhanced feature clarity.
+*   **Model**: Transfer Learning using a pre-trained **ResNet-50** backbone followed by a **Calibrated SVM** classifier.
+*   **Explainability**: Application of **Grad-CAM** to generate class-activation heatmaps.
+*   **Output**: Final diagnosis delivered via a web interface with confidence scores and medical reports.
 
-*   **🧪 Hybrid AI Engine**: Uses **ResNet-50** for feature extraction and **Calibrated SVM** (23 classes) for maximum classification precision.
-*   **🔍 Explainable AI (Grad-CAM)**: Generates heatmaps to show exactly which region of the skin lesion influenced the AI's diagnosis.
-*   **📊 Confidence Scoring**: Provides a percentage-based reliability score for every prediction using probability calibration.
-*   **📄 Medical Reporting**: Automatically generates detailed reports including descriptions, causes, and treatment suggestions.
-*   **📱 Modern Dashboard**: A fully responsive, dark-themed UI for seamless image uploads and result viewing.
+## 5. Tech Stack
+*   **Languages**: Python 3.10+
+*   **Frameworks**: Flask (Backend), TensorFlow/Keras (Deep Learning), Scikit-learn (Machine Learning)
+*   **Tools**: OpenCV (Image Processing), Matplotlib (Visualizations), Git (Version Control)
 
----
+## 6. Datasets Used
+*   **HAM10000**: Used for high-risk pigmented lesion detection (Melanoma, BCC, etc.).
+*   **DermNet NZ**: Used for broad classification across 23 common skin disease categories.
 
-## 🛠️ Technology Stack
-
-| Component | Technology |
-| :--- | :--- |
-| **Language** | Python 3.10+ |
-| **Deep Learning** | TensorFlow / Keras (ResNet-50) |
-| **Machine Learning** | Scikit-learn (Calibrated SVM) |
-| **Computer Vision** | OpenCV (CLAHE Pre-processing) |
-| **Backend** | Flask |
-| **Frontend** | HTML5, CSS3, Vanilla JS |
-
----
-
-## 🔬 Methodology
-
-### 1. Data Fusion
-We integrated two massive dermatological repositories:
-*   **DermNet NZ**: 23 categories of common and complex skin diseases.
-*   **HAM10000 / ISIC**: High-risk pigmented lesions (Skin Cancer).
-
-### 2. Pre-processing (CLAHE)
-Images are normalized using **Contrast Limited Adaptive Histogram Equalization** to ensure consistent lighting and skin tone analysis across different datasets.
-
-### 3. The Hybrid Algorithm
-Instead of a standard Softmax layer, we extract a **2048-dimensional feature vector** from the final ResNet layer and feed it into a **Calibrated SVM** classifier. This provides superior decision boundaries for medically similar conditions.
-
----
-
-## 📋 Supported Diseases (23 Classes)
-
-1. **Acne & Rosacea** (Acne/Rosacea)
-2. **Skin Cancer (Malignant)** (Actinic Keratosis/BCC)
-3. **Atopic Dermatitis** (Eczema)
-4. **Bullous Disease** (Blistering Disorders)
-5. **Bacterial Infections** (Cellulitis/Impetigo)
-6. **Eczema** (Nonspecific Dermatitis)
-7. **Exanthems & Drug Eruptions**
-8. **Alopecia & Hair Loss**
-9. **Viral Infection (STDs)** (Herpes/HPV)
-10. **Pigmentation Disorders** (Vitiligo/Melasma)
-11. **Connective Tissue Disease** (Lupus)
-12. **Melanoma & Moles** (Pigmented Cancer)
-13. **Nail Fungus** (Onychomycosis)
-14. **Contact Dermatitis** (Poison Ivy/Allergies)
-15. **Psoriasis** (Psoriasis/Lichen Planus)
-16. **Infestations & Bites** (Scabies/Lyme)
-17. **Benign Tumors** (Seborrheic Keratoses)
-18. **Systemic Skin Manifestations**
-19. **Fungal Infection** (Tinea/Ringworm)
-20. **Urticaria** (Hives)
-21. **Vascular Tumors**
-22. **Vasculitis**
-23. **Viral Infections** (Warts/Molluscum)
-
----
-
-## 💻 Installation & Setup
-
+## 7. Installation / Setup
 1.  **Clone the Repository**
     ```bash
     git clone https://github.com/saivikas35/AI-BASED-SKIN-DISEASE-DETECTION-AND-CLASSIFICATION-.git
-    cd AI-BASED-SKIN-DISEASE-DETECTION-AND-CLASSIFICATION-
     ```
-
 2.  **Install Dependencies**
     ```bash
     pip install -r requirements.txt
     ```
-
-3.  **Run the Application**
+3.  **Run the Project**
     ```bash
     python skin_disease_detection/app.py
     ```
 
-4.  **Access the Dashboard**
-    Open `http://127.0.0.1:5000` in your browser.
+## 8. Usage
+*   **Step 1**: Open the dashboard at `http://127.0.0.1:5000`.
+*   **Step 2**: Drag and drop or upload a skin lesion image.
+*   **Step 3**: Click "Analyze" to trigger the ResNet-SVM inference engine.
+*   **Step 4**: View the prediction result, confidence score, and the Grad-CAM heatmap.
+*   **Step 5**: Click "Generate Medical Report" for a detailed clinical overview.
 
----
+## 9. Project Structure
+```text
+├── skin_disease_detection/
+│   ├── models/             # Pre-trained ResNet & SVM models
+│   ├── static/             # CSS, JS, and Uploaded Images
+│   ├── ui_components/      # HTML Templates (Dashboard, Reports)
+│   ├── app.py              # Main Flask Entry Point
+│   └── categories.py       # 23-Class Mapping & Logic
+├── README.md               # Project Documentation
+└── requirements.txt        # Python Dependencies
+```
 
-## 📜 License
+## 10. Sample Outputs
+*(Place your screenshots here for the report)*
+*   **Input Image**: The original raw skin lesion photo.
+*   **Prediction**: The dashboard showing the identified disease and % confidence.
+*   **Heatmap**: The Grad-CAM visualization highlighting the lesion area.
+*   **Report**: The full-page medical report generated by the system.
 
-Distributed under the MIT License. See `LICENSE` for more information.
+## 11. Limitations / Notes
+*   **Model Size**: The ResNet-50 model is ~94MB; ensure Git LFS is used if tracking further history.
+*   **Dataset Access**: Due to licensing, the full 40,000+ training images are not included in this repo.
+*   **Clinical Warning**: This tool is for project/academic use and should not replace professional medical advice.
 
----
+## 12. Future Scope
+*   **Mobile Integration**: Developing an Android/iOS app for point-of-care testing.
+*   **Real-time Video Analysis**: Integration with dermatoscopes for live video feeds.
+*   **Metadata Integration**: Combining patient age, gender, and location history for improved accuracy.
 
-## 👥 Developers
-
+## 13. Authors
 *   **Sai Vikas**
 *   **G. Sarvaghna Reddy**
 
-*AI & Machine Learning Engineering Team*
-
----
-
-> **Note**: This tool is for educational and clinical support purposes only. Always consult a board-certified dermatologist for medical concerns.
+## 14. License
+This project is licensed under the **MIT License** - see the LICENSE file for details. Intended for **Academic & Project use**.
